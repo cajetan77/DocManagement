@@ -1,0 +1,376 @@
+.documentLibraryViews {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: inherit;
+  }
+
+  .viewsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+  }
+
+  .viewTile {
+    background: white;
+    border: 1px solid var(--neutralLight);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--themePrimary), var(--themeSecondary));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+      background: white;
+      border-color: var(--themePrimary);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      
+      &::before {
+        opacity: 1;
+      }
+      
+      .tileIcon {
+        transform: scale(1.1);
+        color: var(--themePrimary);
+      }
+      
+      .tileCount {
+        transform: scale(1.05);
+      }
+    }
+
+    &.defaultView {
+      border-color: var(--themePrimary);
+      background: linear-gradient(135deg, var(--themeLighter), white);
+      box-shadow: 0 4px 16px rgba(0, 120, 212, 0.15);
+      
+      &::before {
+        opacity: 1;
+        background: var(--themePrimary);
+      }
+    }
+
+    &.expandedTile {
+      min-height: 200px;
+    }
+  }
+
+  .tileHeader {
+    padding-left: 80px;
+    margin-bottom: 20px;
+    padding-top: 8px;
+  }
+
+  .tileIcon {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 20px;
+    color: var(--themePrimary);
+    transition: all 0.3s ease;
+    background: white;
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--themePrimary);
+    z-index: 1;
+  }
+
+  .tileTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--neutralPrimary);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .tileCount {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 50px;
+    
+    &.countBlack {
+      color: var(--neutralPrimary);
+    }
+    
+    &.countBlue {
+      color:blue;
+    }
+    &.countaliceBlue {
+      color: blue;
+    }
+    
+    &.countOrange {
+      color: #ff8c00;
+    }
+    
+    &.countRed {
+      color: #d13438;
+    }
+  }
+
+  .viewMoreButton {
+    margin-top: auto;
+    text-align: center;
+  }
+
+  .viewMoreBtn {
+    background: var(--themePrimary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 120, 212, 0.2);
+
+    &:hover {
+      background: var(--themeDarkAlt);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 120, 212, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 120, 212, 0.2);
+    }
+  }
+
+  .viewTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: inherit;
+  }
+
+  .viewType {
+    font-size: 12px;
+    color: var(--neutralSecondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .viewCount {
+    font-size: 14px;
+    color: var(--themePrimary);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .viewBadges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.default {
+      background: var(--themePrimary);
+      color: white;
+    }
+
+    &.hidden {
+      background: var(--neutralTertiary);
+      color: var(--neutralPrimary);
+    }
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--neutralSecondary);
+  }
+
+  .error {
+    background: var(--errorBackground);
+    color: var(--errorText);
+    padding: 16px;
+    border-radius: 4px;
+    margin: 20px 0;
+  }
+
+  .emptyState {
+    text-align: center;
+    padding: 40px;
+    color: var(--neutralSecondary);
+
+    .emptyIcon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: var(--neutralTertiary);
+    }
+  }
+
+  .expandedTile {
+    min-height: 200px;
+  }
+
+  .toggleIcon {
+    font-size: 16px;
+    color: var(--themePrimary);
+    margin-left: auto;
+    transition: transform 0.3s ease;
+  }
+
+  .toggleArrow {
+    font-size: 16px;
+    color: var(--themePrimary);
+    text-align: center;
+    margin-top: 8px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    
+    &:hover {
+      color: var(--themeDarkAlt);
+    }
+  }
+
+  .toggleButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--themePrimary);
+    text-align: center;
+    margin-top: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    
+    &:hover {
+      color: var(--themeDarkAlt);
+      background-color: var(--themeLighter);
+    }
+  }
+
+  .toggleText {
+    font-weight: 500;
+  }
+
+  .expandedViews {
+    margin-top: 16px;
+    border-top: 1px solid var(--neutralLight);
+    padding-top: 16px;
+  }
+
+  .expandedViewsContainer {
+    width: 100%;
+  }
+
+  .expandedViewsTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--neutralPrimary);
+    margin-bottom: 12px;
+  }
+
+  .libraryName {
+    flex: 1;
+  }
+
+  .libraryIcon {
+    font-size: 16px;
+    color: var(--themePrimary);
+    margin-left: 8px;
+  }
+
+  .expandedViewsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .expandedViewItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--neutralLighter);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--themeLighter);
+      transform: translateX(4px);
+    }
+  }
+
+  .expandedViewTitle {
+    font-size: 13px;
+    color: var(--neutralPrimary);
+    font-weight: 500;
+  }
+
+  .expandedViewCount {
+    font-size: 12px;
+    color: var(--themePrimary);
+    font-weight: 600;
+    background: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .noViewsMessage {
+    text-align: center;
+    font-size: 12px;
+    color: var(--neutralSecondary);
+    font-style: italic;
+    padding: 8px;
+  }
+}
