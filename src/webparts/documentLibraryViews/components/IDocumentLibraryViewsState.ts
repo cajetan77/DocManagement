@@ -7,5 +7,6 @@ export interface IDocumentLibraryViewsState {
   expandedTiles: string[];
   publishedLibraryViews: IViewInfo[];
   workingLibraryViews: IViewInfo[];
+  loadingExpandedViews: string[]; // Track which tiles are loading expanded views
 }
 

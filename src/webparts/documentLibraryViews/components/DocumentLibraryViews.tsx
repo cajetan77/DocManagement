@@ -16,14 +16,15 @@ import type { IViewInfo } from './IViewInfo';
 export default class DocumentLibraryViews extends React.Component<IDocumentLibraryViewsProps, IDocumentLibraryViewsState> {
   constructor(props: IDocumentLibraryViewsProps) {
     super(props);
-               this.state = {
-        views: [],
-        isLoading: true,
-        error: null,
-        expandedTiles: [],
-        publishedLibraryViews: [],
-        workingLibraryViews: []
-      };
+                               this.state = {
+         views: [],
+         isLoading: true,
+         error: null,
+         expandedTiles: [],
+         publishedLibraryViews: [],
+         workingLibraryViews: [],
+         loadingExpandedViews: []
+       };
   }
 
   public componentDidMount(): void {
@@ -1268,9 +1269,12 @@ export default class DocumentLibraryViews extends React.Component<IDocumentLibra
             return !unwantedViews.some(unwanted => title.indexOf(unwanted) >= 0);
           });
         
-        console.log('Filtered working views with counts:', filteredWorkingViews);
-        this.setState({ workingLibraryViews: filteredWorkingViews });
-        console.log('Working Document Library views loaded:', filteredWorkingViews.length);
+                 console.log('Filtered working views with counts:', filteredWorkingViews);
+         this.setState(prevState => ({
+           workingLibraryViews: filteredWorkingViews,
+           loadingExpandedViews: prevState.loadingExpandedViews.filter(id => id !== 'working-document')
+         }));
+         console.log('Working Document Library views loaded:', filteredWorkingViews.length);
       } catch (error) {
         console.error('Error loading Working Document Library views:', error);
         this.setState({ workingLibraryViews: [] });
@@ -1436,65 +1440,86 @@ export default class DocumentLibraryViews extends React.Component<IDocumentLibra
 
            
 
-      private toggleTileExpansion = (tileId: string): void => {
-      this.setState(prevState => {
-        const newExpandedTiles = [...prevState.expandedTiles];
-        const index = newExpandedTiles.indexOf(tileId);
-        const isCurrentlyExpanded = index > -1;
-        
-        if (isCurrentlyExpanded) {
-          newExpandedTiles.splice(index, 1);
-        } else {
-          newExpandedTiles.push(tileId);
-        }
-        
-                                  // If expanding the Published Documents tile, fetch its views
-           /*if (tileId === 'published-documents' && !isCurrentlyExpanded) {
-             void this.loadPublishedDocumentLibraryViews();
-           }*/
-           
-           // If expanding the Working Document tile, fetch its views
-           if (tileId === 'working-document' && !isCurrentlyExpanded) {
-             void this.loadWorkingDocumentLibraryViews();
-           }
-        
-                 return { expandedTiles: newExpandedTiles };
-       });
-     };
+                    private toggleTileExpansion = (tileId: string): void => {
+        this.setState(prevState => {
+          const newExpandedTiles = [...prevState.expandedTiles];
+          const index = newExpandedTiles.indexOf(tileId);
+          const isCurrentlyExpanded = index > -1;
+          
+          if (isCurrentlyExpanded) {
+            newExpandedTiles.splice(index, 1);
+            // Remove from loading state when collapsing
+            const newLoadingExpandedViews = prevState.loadingExpandedViews.filter(id => id !== tileId);
+            return { expandedTiles: newExpandedTiles, loadingExpandedViews: newLoadingExpandedViews };
+          } else {
+            newExpandedTiles.push(tileId);
+            
+            // If expanding the Working Document tile, fetch its views
+            if (tileId === 'working-document') {
+              // Add to loading state
+              const newLoadingExpandedViews = [...prevState.loadingExpandedViews, tileId];
+              void this.loadWorkingDocumentLibraryViews();
+              return { expandedTiles: newExpandedTiles, loadingExpandedViews: newLoadingExpandedViews };
+            }
+          }
+          
+          return { expandedTiles: newExpandedTiles, loadingExpandedViews: prevState.loadingExpandedViews };
+         });
+       };
 
-     private renderExpandedViews = (tileId: string): JSX.Element => {
-       const { views, publishedLibraryViews, workingLibraryViews } = this.state;
-       console.log('Regular Views:', views);
-     
-       // Filter views based on the tile type
-       let filteredViews: IViewInfo[] = [];
-       let libraryName: string = '';
-       
-       if (tileId === 'published-documents') {
-         // Show views from the Published Document Library
-         filteredViews = publishedLibraryViews || [];
-         libraryName = 'Published Document Library';
-       } else if (tileId === 'working-document') {
-         // Show views from the Working Document Library
-         filteredViews = workingLibraryViews || [];
-         libraryName = 'Working Document Library';
-       }
-     
-       if (filteredViews.length === 0) {
-         return (
-           <div className={styles.expandedViewsContainer}>
-             <div className={styles.expandedViewsTitle}>
-               <div className={styles.libraryName}>{libraryName} Views:</div>
-               <div className={styles.libraryIcon}>
-                 <Icon iconName="DocumentLibrary" />
-               </div>
-             </div>
-             <div className={styles.emptyState}>
-               <Text variant="medium">No views available for this library.</Text>
-             </div>
-           </div>
-         );
-       }
+           private renderExpandedViews = (tileId: string): JSX.Element => {
+        const { views, publishedLibraryViews, workingLibraryViews, loadingExpandedViews } = this.state;
+        console.log('Regular Views:', views);
+      
+        // Check if this tile is currently loading expanded views
+        const isLoading = loadingExpandedViews.indexOf(tileId) > -1;
+      
+        // Filter views based on the tile type
+        let filteredViews: IViewInfo[] = [];
+        let libraryName: string = '';
+        
+        if (tileId === 'published-documents') {
+          // Show views from the Published Document Library
+          filteredViews = publishedLibraryViews || [];
+          libraryName = 'Published Document Library';
+        } else if (tileId === 'working-document') {
+          // Show views from the Working Document Library
+          filteredViews = workingLibraryViews || [];
+          libraryName = 'Working Document Library';
+        }
+      
+        // Show loading spinner if views are being loaded
+        if (isLoading) {
+          return (
+            <div className={styles.expandedViewsContainer}>
+              <div className={styles.expandedViewsTitle}>
+                <div className={styles.libraryName}>{libraryName} Views:</div>
+                <div className={styles.libraryIcon}>
+                  <Icon iconName="DocumentLibrary" />
+                </div>
+              </div>
+              <div className={styles.loading}>
+                <Spinner size={SpinnerSize.small} label="Loading views..." />
+              </div>
+            </div>
+          );
+        }
+      
+        if (filteredViews.length === 0) {
+          return (
+            <div className={styles.expandedViewsContainer}>
+              <div className={styles.expandedViewsTitle}>
+                <div className={styles.libraryName}>{libraryName} Views:</div>
+                <div className={styles.libraryIcon}>
+                  <Icon iconName="DocumentLibrary" />
+                </div>
+              </div>
+              <div className={styles.emptyState}>
+                <Text variant="medium">No views available for this library.</Text>
+              </div>
+            </div>
+          );
+        }
      
        return (
          <div className={styles.expandedViewsContainer}>
@@ -1610,10 +1635,10 @@ export default class DocumentLibraryViews extends React.Component<IDocumentLibra
      const isExpanded = expandedTiles.indexOf(view.Id) > -1;
      const isSummaryTile = view.Id === 'published-documents' || view.Id === 'working-document';
 
-    return (
+         return (
              <div
          key={view.Id}
-         className={`${styles.viewTile} ${view.DefaultView ? styles.defaultView : ''} ${isExpanded ? styles.expandedTile : ''}`}
+         className={`${styles.viewTile} ${view.DefaultView ? styles.defaultView : ''} ${(isExpanded && isSummaryTile) ? styles.expandedTile : ''} ${(isExpanded && isSummaryTile) ? styles.hasViewMore : ''}`}
          onClick={() => this.handleViewClick(view)}
                   // title={`Click to ${(view.Id === 'published-documents' || view.Id === 'working-document') ? 'use toggle button' : 'open'} ${view.Status || view.Title} ${(view.Id === 'published-documents' || view.Id === 'working-document') ? 'details' : 'library'}`}
                >
@@ -1621,7 +1646,7 @@ export default class DocumentLibraryViews extends React.Component<IDocumentLibra
            <Icon iconName={view.IconName || 'DocumentLibrary'} />
          </div>
          <div className={styles.tileHeader}>
-           <div className={styles.tileTitle}>{view.Status || view.Title}</div>
+           <div className={`${styles.tileTitle} ${getStatusColor(view.StatusColor || 'black')}`}>{view.Status || view.Title}</div>
          </div>
 
                           <div className={`${styles.tileCount} ${getStatusColor(view.StatusColor || 'black')}`}>

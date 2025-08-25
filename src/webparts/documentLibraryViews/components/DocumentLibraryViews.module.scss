@@ -14,9 +14,10 @@
 
   .viewsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
     margin-top: 20px;
+    align-items: start; // Prevent tiles from stretching to match tallest tile
   }
 
   .viewTile {
@@ -78,7 +79,16 @@
     }
 
     &.expandedTile {
-      min-height: 200px;
+      // Only expand height for tiles with View More functionality
+      &.hasViewMore {
+        min-height: 200px;
+      }
+    }
+    
+    // Ensure non-expanded tiles maintain their original height
+    &:not(.expandedTile) {
+      height: fit-content;
+      min-height: 140px;
     }
   }
 
@@ -249,9 +259,7 @@
     }
   }
 
-  .expandedTile {
-    min-height: 200px;
-  }
+  // Removed duplicate rule - now handled in .viewTile.expandedTile.hasViewMore
 
   .toggleIcon {
     font-size: 16px;
@@ -373,4 +381,5 @@
     font-style: italic;
     padding: 8px;
   }
+
 }
